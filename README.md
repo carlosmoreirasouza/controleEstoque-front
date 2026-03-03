@@ -1,10 +1,10 @@
-# Controle de Estoque Front
+# Controle de Estoque Front (Next.js)
 
-Aplicação web simples para consumir uma API de controle de estoque.
+Aplicação front-end em **Node.js + Next.js** para consumir uma API de controle de estoque.
 
 ## Funcionalidades
 
-- Configurar URL base da API e salvar no navegador.
+- Configurar URL base da API e salvar no navegador (`localStorage`).
 - Tela de cadastro de produto.
 - Tela de baixa de produto (retirada do estoque).
 - Tela de cadastro de item da lista de desejos.
@@ -51,10 +51,16 @@ Aplicação web simples para consumir uma API de controle de estoque.
 
 ## Executar localmente
 
-Como é um projeto estático, basta servir os arquivos:
-
 ```bash
-python3 -m http.server 4173
+npm install
+npm run dev
 ```
 
-Depois abra `http://localhost:4173`.
+Depois abra `http://localhost:3000`.
+
+## Scripts
+
+- `npm run dev` inicia o ambiente de desenvolvimento.
+- `npm run build` gera build de produção.
+- `npm run start` sobe aplicação em produção.
+- `npm run lint` executa verificação de lint.
