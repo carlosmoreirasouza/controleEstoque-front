@@ -6,8 +6,9 @@ Aplicação web simples para consumir uma API de controle de estoque.
 
 - Configurar URL base da API e salvar no navegador.
 - Tela de cadastro de produto.
+- Tela de baixa de produto (retirada do estoque).
 - Tela de cadastro de item da lista de desejos.
-- Listagem de produtos e itens da lista de desejos.
+- Listagem de produtos, baixas e itens da lista de desejos.
 
 ## Contrato esperado da API
 
@@ -21,6 +22,18 @@ Aplicação web simples para consumir uma API de controle de estoque.
   "sku": "SKU001",
   "quantidade": 10,
   "preco": 12.5
+}
+```
+
+### Baixa de produtos
+- `GET /produtos/baixas` -> retorna array de baixas registradas.
+- `POST /produtos/baixas` -> registra uma baixa com payload:
+
+```json
+{
+  "sku": "SKU001",
+  "quantidade": 2,
+  "motivo": "venda"
 }
 ```
 
