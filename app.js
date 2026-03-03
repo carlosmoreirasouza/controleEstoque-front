@@ -3,6 +3,7 @@ const API_STORAGE_KEY = 'controle_estoque_api_base_url';
 const apiInput = document.getElementById('apiBaseUrl');
 const apiStatus = document.getElementById('apiStatus');
 const produtoLista = document.getElementById('produtoLista');
+const baixaLista = document.getElementById('baixaLista');
 const desejoLista = document.getElementById('desejoLista');
 
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -70,6 +71,22 @@ function renderProdutos(items) {
   });
 }
 
+function renderBaixas(items) {
+  baixaLista.innerHTML = '';
+
+  if (!items.length) {
+    baixaLista.innerHTML = '<li>Nenhuma baixa registrada.</li>';
+    return;
+  }
+
+  items.forEach((item) => {
+    const li = document.createElement('li');
+    const data = item.data ? new Date(item.data).toLocaleString('pt-BR') : 'Data não informada';
+    li.textContent = `SKU: ${item.sku} | Qtd baixa: ${item.quantidade} | Data: ${data}${item.motivo ? ` | Motivo: ${item.motivo}` : ''}`;
+    baixaLista.appendChild(li);
+  });
+}
+
 function renderDesejos(items) {
   desejoLista.innerHTML = '';
 
@@ -92,6 +109,16 @@ async function carregarProdutos() {
   } catch (error) {
     renderProdutos([]);
     notify(`Falha ao carregar produtos: ${error.message}`);
+  }
+}
+
+async function carregarBaixas() {
+  try {
+    const data = await request('/produtos/baixas');
+    renderBaixas(Array.isArray(data) ? data : []);
+  } catch (error) {
+    renderBaixas([]);
+    notify(`Falha ao carregar baixas de produtos: ${error.message}`);
   }
 }
 
@@ -136,6 +163,30 @@ document.getElementById('produtoForm').addEventListener('submit', async (event) 
   }
 });
 
+document.getElementById('baixaForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(event.currentTarget);
+  const payload = {
+    sku: formData.get('sku'),
+    quantidade: Number(formData.get('quantidade')),
+    motivo: formData.get('motivo')?.toString().trim() || null,
+  };
+
+  try {
+    await request('/produtos/baixas', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    event.currentTarget.reset();
+    notify('Baixa de produto registrada com sucesso.');
+    await Promise.all([carregarProdutos(), carregarBaixas()]);
+  } catch (error) {
+    notify(`Erro ao registrar baixa de produto: ${error.message}`);
+  }
+});
+
 document.getElementById('desejoForm').addEventListener('submit', async (event) => {
   event.preventDefault();
 
@@ -161,6 +212,7 @@ document.getElementById('desejoForm').addEventListener('submit', async (event) =
 });
 
 document.getElementById('refreshProdutos').addEventListener('click', carregarProdutos);
+document.getElementById('refreshBaixas').addEventListener('click', carregarBaixas);
 document.getElementById('refreshDesejos').addEventListener('click', carregarDesejos);
 
 tabButtons.forEach((button) => {
@@ -173,4 +225,5 @@ apiInput.value = getApiBaseUrl();
 notify(apiInput.value ? 'URL da API carregada do armazenamento local.' : 'Defina a URL base da API para começar.');
 
 carregarProdutos();
+carregarBaixas();
 carregarDesejos();
