@@ -33,9 +33,22 @@ export default function HomePage() {
     const savedApi = window.localStorage.getItem(API_STORAGE_KEY) || '';
     setApiBaseUrl(savedApi);
 
-    if (savedApi) {
-      Promise.all([carregarProdutos(savedApi), carregarBaixas(savedApi), carregarDesejos(savedApi)]);
+    if (!savedApi) {
+      return;
     }
+
+    const normalizedBaseUrl = savedApi.trim().replace(/\/$/, '');
+    const fetchJson = (path) => fetch(`${normalizedBaseUrl}${path}`).then((response) => response.json());
+
+    Promise.all([
+      fetchJson('/produtos').catch(() => []),
+      fetchJson('/produtos/baixas').catch(() => []),
+      fetchJson('/lista-desejos').catch(() => []),
+    ]).then(([produtosData, baixasData, desejosData]) => {
+      setProdutos(Array.isArray(produtosData) ? produtosData : []);
+      setBaixas(Array.isArray(baixasData) ? baixasData : []);
+      setDesejos(Array.isArray(desejosData) ? desejosData : []);
+    });
   }, []);
 
   async function request(path, options = {}, baseUrlOverride) {
@@ -210,14 +223,17 @@ export default function HomePage() {
   }
 
   return (
-    <>
-      <header>
-        <h1>Controle de Estoque</h1>
-        <p>Front-end para integração com API de produtos e lista de desejos.</p>
+    <div className="app-shell">
+      <header className="hero">
+        <div className="hero-content">
+          <p className="eyebrow">Painel de gestão</p>
+          <h1>Controle de Estoque</h1>
+          <p>Front-end para integração com API de produtos, baixas e lista de desejos.</p>
+        </div>
       </header>
 
-      <main>
-        <section className="card">
+      <main className="page-content">
+        <section className="card api-card">
           <h2>Configuração da API</h2>
           <label htmlFor="apiBaseUrl">URL base da API (ex.: http://localhost:3000)</label>
           <div className="inline">
@@ -233,6 +249,21 @@ export default function HomePage() {
             </button>
           </div>
           <small role="status">{status}</small>
+        </section>
+
+        <section className="overview-grid" aria-label="Resumo rápido do estoque">
+          <article className="overview-card">
+            <span>Total de produtos</span>
+            <strong>{produtos.length}</strong>
+          </article>
+          <article className="overview-card">
+            <span>Baixas registradas</span>
+            <strong>{baixas.length}</strong>
+          </article>
+          <article className="overview-card">
+            <span>Itens desejados</span>
+            <strong>{desejos.length}</strong>
+          </article>
         </section>
 
         <nav className="tabs" aria-label="Abas de funcionalidades">
@@ -411,6 +442,6 @@ export default function HomePage() {
           </section>
         )}
       </main>
-    </>
+    </div>
   );
 }

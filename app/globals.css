@@ -1,11 +1,14 @@
 :root {
-  --bg: #f3f4f6;
+  --bg: #eef2ff;
+  --bg-strong: #dbeafe;
   --card: #ffffff;
   --text: #111827;
+  --muted: #4b5563;
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --secondary: #6b7280;
   --border: #d1d5db;
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -15,29 +18,86 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: var(--bg);
+  background: linear-gradient(160deg, var(--bg) 0%, #f8fafc 45%, var(--bg-strong) 100%);
   color: var(--text);
 }
 
-header {
-  padding: 1.5rem;
-  text-align: center;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
+.app-shell {
+  min-height: 100vh;
 }
 
-main {
-  max-width: 900px;
-  margin: 1.5rem auto;
-  padding: 0 1rem 1.5rem;
+.hero {
+  padding: 2.5rem 1rem 2rem;
+}
+
+.hero-content {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.hero h1 {
+  margin: 0.4rem 0;
+  font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.page-content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 1.1rem;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.api-card {
+  margin-top: 0.3rem;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.overview-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(1px);
+}
+
+.overview-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.overview-card strong {
+  display: block;
+  font-size: 1.8rem;
+  margin-top: 0.2rem;
 }
 
 .inline {
@@ -52,6 +112,7 @@ main {
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
@@ -59,15 +120,20 @@ main {
 .tab-button {
   border: 1px solid var(--border);
   background: var(--card);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0.65rem 1rem;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .tab-button.active {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
+}
+
+.tab-button:hover {
+  transform: translateY(-1px);
 }
 
 form {
@@ -125,4 +191,10 @@ small[role='status'] {
   display: block;
   margin-top: 0.5rem;
   color: var(--secondary);
+}
+
+@media (max-width: 640px) {
+  .inline {
+    flex-direction: column;
+  }
 }
