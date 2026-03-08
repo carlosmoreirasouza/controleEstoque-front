@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baixa de Produto em Estoque</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --danger: #dc2626;
+        --ok: #059669;
+        --border: #e5e7eb;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 16px 24px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        padding: 24px;
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 1.8rem;
+      }
+
+      .subtitle {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      input, textarea, select, button {
+        font: inherit;
+      }
+
+      input, textarea {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        outline: none;
+        transition: border-color .15s ease;
+      }
+
+      input:focus, textarea:focus {
+        border-color: var(--primary);
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .btn-primary:hover { background: var(--primary-dark); }
+
+      .btn-secondary {
+        background: #eef2ff;
+        color: #3730a3;
+      }
+
+      .feedback {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        display: none;
+      }
+
+      .feedback.ok {
+        background: #ecfdf5;
+        color: var(--ok);
+        border: 1px solid #a7f3d0;
+        display: block;
+      }
+
+      .feedback.error {
+        background: #fef2f2;
+        color: var(--danger);
+        border: 1px solid #fecaca;
+        display: block;
+      }
+
+      .table-wrap {
+        margin-top: 22px;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        padding: 10px 8px;
+        font-size: 0.95rem;
+      }
+
+      th { color: var(--muted); font-weight: 600; }
+
+      .empty {
+        color: var(--muted);
+        font-style: italic;
+        margin: 14px 0 4px;
+      }
+
+      @media (max-width: 720px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Baixa de produto no estoque</h1>
+        <p class="subtitle">Registre uma saída e mantenha o histórico das baixas.</p>
+
+        <form id="baixaForm">
+          <div class="grid">
+            <div class="field">
+              <label for="produto">Produto</label>
+              <input id="produto" name="produto" type="text" required placeholder="Ex: Arroz 5kg" />
+            </div>
+
+            <div class="field">
+              <label for="quantidade">Quantidade retirada</label>
+              <input id="quantidade" name="quantidade" type="number" min="1" required placeholder="Ex: 2" />
+            </div>
+
+            <div class="field">
+              <label for="responsavel">Responsável</label>
+              <input id="responsavel" name="responsavel" type="text" required placeholder="Ex: João" />
+            </div>
+
+            <div class="field">
+              <label for="setor">Setor / Destino</label>
+              <input id="setor" name="setor" type="text" required placeholder="Ex: Cozinha" />
+            </div>
+
+            <div class="field full">
+              <label for="observacao">Observação</label>
+              <textarea id="observacao" name="observacao" rows="3" placeholder="Motivo da baixa (opcional)"></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn-primary">Registrar baixa</button>
+            <button type="button" id="limparHistorico" class="btn-secondary">Limpar histórico</button>
+          </div>
+
+          <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+        </form>
+
+        <div class="table-wrap">
+          <h2>Histórico de baixas</h2>
+          <p id="emptyState" class="empty">Nenhuma baixa registrada até agora.</p>
+          <table id="tabelaBaixas" hidden>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Qtd.</th>
+                <th>Responsável</th>
+                <th>Setor</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE_KEY = 'controle-estoque-baixas';
+
+      const form = document.getElementById('baixaForm');
+      const feedback = document.getElementById('feedback');
+      const tabela = document.getElementById('tabelaBaixas');
+      const tbody = tabela.querySelector('tbody');
+      const emptyState = document.getElementById('emptyState');
+      const limparHistoricoBtn = document.getElementById('limparHistorico');
+
+      function getBaixas() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveBaixas(baixas) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(baixas));
+      }
+
+      function formatDate(isoString) {
+        return new Date(isoString).toLocaleString('pt-BR');
+      }
+
+      function renderTabela() {
+        const baixas = getBaixas();
+        tbody.innerHTML = '';
+
+        if (!baixas.length) {
+          tabela.hidden = true;
+          emptyState.hidden = false;
+          return;
+        }
+
+        tabela.hidden = false;
+        emptyState.hidden = true;
+
+        baixas.forEach((item) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${formatDate(item.data)}</td>
+            <td>${item.produto}</td>
+            <td>${item.quantidade}</td>
+            <td>${item.responsavel}</td>
+            <td>${item.setor}</td>
+            <td>${item.observacao || '-'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function showFeedback(message, type = 'ok') {
+        feedback.textContent = message;
+        feedback.className = `feedback ${type}`;
+      }
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const produto = (formData.get('produto') || '').toString().trim();
+        const quantidade = Number(formData.get('quantidade'));
+        const responsavel = (formData.get('responsavel') || '').toString().trim();
+        const setor = (formData.get('setor') || '').toString().trim();
+        const observacao = (formData.get('observacao') || '').toString().trim();
+
+        if (!produto || !responsavel || !setor || Number.isNaN(quantidade) || quantidade <= 0) {
+          showFeedback('Preencha os campos obrigatórios com valores válidos.', 'error');
+          return;
+        }
+
+        const novaBaixa = {
+          data: new Date().toISOString(),
+          produto,
+          quantidade,
+          responsavel,
+          setor,
+          observacao,
+        };
+
+        const baixas = getBaixas();
+        baixas.unshift(novaBaixa);
+        saveBaixas(baixas);
+
+        form.reset();
+        showFeedback('Baixa registrada com sucesso!', 'ok');
+        renderTabela();
+      });
+
+      limparHistoricoBtn.addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        showFeedback('Histórico removido.', 'ok');
+        renderTabela();
+      });
+
+      renderTabela();
+    </script>
+  </body>
+</html>
