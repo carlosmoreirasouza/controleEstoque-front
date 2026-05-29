@@ -1,4 +1,4 @@
-import './globals.css';
+import AppThemeProvider from './theme-provider';
 
 export const metadata = {
   title: 'Controle de Estoque Front',
@@ -8,7 +8,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <AppThemeProvider>{children}</AppThemeProvider>
+      </body>
     </html>
   );
 }
